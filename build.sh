@@ -9,8 +9,8 @@ imgtool put coco_jvc_rsdos edtasm.dsk MAIN.BIN MAIN.BIN
 ./prepend.py > code.asm
 imgtool put coco_jvc_rsdos edtasm.dsk CODE.ASM CODE.ASM --ascii=ascii --ftype=assembler
 
-cp edtasm.dsk VCC/disks
-mv edtasm.dsk Mame/disks
+cp edtasm.dsk ../VCC/disks
+mv edtasm.dsk ../Mame/disks
 
 rm main.bin
 rm code.asm
