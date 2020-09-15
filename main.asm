@@ -16,28 +16,28 @@ initv	lda	#$f0
 	sta	$ffc9
 	rts
 
-vpclr	ldd	#0	Clear the screen
-	ldx	#vpstr	Load the start address
+vpclr	ldd	#0
+	ldx	#vpstr
 vpclp	std	,x++	
 	cmpx	#vpend
 	blo	vpclp
 	rts
 
-vert	ldd	#$101	Set the vertical lines
+vert	ldd	#$101
 	ldx	#vpstr
 loop2	std	,x++
 	cmpx	#vpend
 	blo	loop2
 	rts
 
-horiz	ldd	#$ffff	Set the horizontal lines
+horiz	ldd	#$ffff
 	ldx	#vpstr
 outer	ldy	#$0
 inner	std	,x++
-	leax	1,y
-	cmpy	#$8
+	leay	+1,y
+	cmpy	#$10
 	blo	inner
-	leax	20,x
+	leax	+32,x
 	cmpx	#vpend
 	blo	outer
 	rts	
