@@ -3,7 +3,8 @@ vpend	equ	$2c00
 	org	$1200
 start	bsr	initv
 	bsr	vpclr
-	bsr	draw
+	bsr	vert
+	bsr	horiz
 loop1	jmp	loop1
 	rts
 
@@ -22,11 +23,18 @@ vpclp	std	,x++
 	blo	vpclp
 	rts
 
-draw	ldd	#$101
+vert	ldd	#$101
 	ldx	#vpstr
 loop2	std	,x++
 	cmpx	#vpend
 	blo	loop2
 	rts
+
+horiz	ldd	#$ffff
+	ldx	#$1420
+loop3	std	,x++
+	cmpx	#$1452
+	blo	loop3
+	rts	
 	
 	end	start
