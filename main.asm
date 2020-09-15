@@ -23,18 +23,23 @@ vpclp	std	,x++
 	blo	vpclp
 	rts
 
-vert	ldd	#$101
+vert	ldd	#$101	Set the vertical lines
 	ldx	#vpstr
 loop2	std	,x++
 	cmpx	#vpend
 	blo	loop2
 	rts
 
-horiz	ldd	#$ffff
-	ldx	#$1420
-loop3	std	,x++
-	cmpx	#$1452
-	blo	loop3
+horiz	ldd	#$ffff	Set the horizontal lines
+	ldx	#vpstr
+outer	ldy	#$0
+inner	std	,x++
+	leax	1,y
+	cmpy	#$8
+	blo	inner
+	leax	20,x
+	cmpx	#vpend
+	blo	outer
 	rts	
 	
 	end	start
