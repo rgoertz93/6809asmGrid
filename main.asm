@@ -37,7 +37,7 @@ inner	std	,x++
 	leay	+1,y
 	cmpy	#$10
 	blo	inner
-	leax	+32,x
+	leax	+224,x
 	cmpx	#vpend
 	blo	outer
 	rts	
