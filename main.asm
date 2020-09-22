@@ -54,8 +54,14 @@ div	suba	#8
 	stb	$38
 	lda	$30
 	suba	$38
+	tfr	a,b
+	ldx	#table
+	abx
+	lda	,x
 	nop
 incr	incb
 	jmp	div
+
+table	fcb	0,128,64,32,16,8,2,1
 
 	end	start
