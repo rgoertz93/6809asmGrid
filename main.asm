@@ -42,24 +42,23 @@ inner	std	,x++
 	blo	outer
 	rts
 	
-xcoord	lda	#33
-	sta	$30
-	ldb	#1
-div	suba	#8		
-	cmpa	#8
+xcoord	ldb	#33
+	stb	$30
+	lda	#1
+div	subb	#8		
+	cmpb	#8
 	bgt	incr
-	lslb
-	lslb
-	lslb
-	stb	$38
-	lda	$30
-	suba	$38
-	tfr	a,b
+	lsla
+	lsla
+	lsla
+	sta	$38
+	ldb	$30
+	subb	$38
 	ldx	#table
 	abx
-	lda	,x
+	ldb	,x
 	nop
-incr	incb
+incr	inca
 	jmp	div
 
 table	fcb	0,128,64,32,16,8,2,1
