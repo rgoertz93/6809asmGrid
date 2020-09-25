@@ -1,6 +1,5 @@
 vpstr	equ	$1400	;top left of screen
 vpend	equ	$2c00	;bottom right of screen
-	org	$1200
 start	bsr	initv
 	bsr	vpclr
 	bsr	vert
@@ -43,24 +42,32 @@ inner	std	,x++
 	rts
 	
 xcoord	ldb	#33
-	stb	$30
+	stb	$e00
 	lda	#1
 div	subb	#8		
 	cmpb	#8
 	bgt	incr
+	pshu	a
 	lsla
 	lsla
 	lsla
-	sta	$38
-	ldb	$30
-	subb	$38
+	sta	$e02
+	ldb	$e00
+	subb	$e02
 	ldx	#table
 	abx
-	ldb	,x
-	nop
+	pshu	x
+retrn	rts
 incr	inca
 	jmp	div
 
-table	fcb	0,128,64,32,16,8,2,1
+table	fcb	0
+	fcb	128
+	fcb	64
+	fcb	32
+	fcb	16
+	fcb	8
+	fcb	2
+	fcb	1
 
 	end	start
