@@ -1,9 +1,17 @@
 vpstr	equ	$1400	;top left of screen
 vpend	equ	$2c00	;bottom right of screen
-start	bsr	initv
+start	nop
+	ldu	#$e30
+	bsr	initv
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
+btx	bsr	xcoord
+	pulu	a
+	pulu	a
+	pulu	b
+	nop
+	nop
 loop1	jmp	loop1
 	rts
 
@@ -57,7 +65,7 @@ div	subb	#8
 	ldx	#table
 	abx
 	pshu	x
-retrn	rts
+	rts
 incr	inca
 	jmp	div
 
