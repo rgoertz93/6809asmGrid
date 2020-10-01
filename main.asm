@@ -1,13 +1,12 @@
 vpstr	equ	$1400	;top left of screen
 vpend	equ	$2c00	;bottom right of screen
-start	nop
+start	org	$1200
 	ldu	#$e30
 	bsr	initv
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
 btx	bsr	xcoord
-	pulu	a
 	pulu	a
 	pulu	b
 	nop
@@ -49,22 +48,23 @@ inner	std	,x++
 	blo	outer
 	rts
 	
-xcoord	ldb	#33
-	stb	$e00
-	lda	#1
-div	subb	#8		
-	cmpb	#8
-	bgt	incr
-	pshu	a
+xcoord	ldb	#33	;Original x coordinate
+	stb	$e00	;store it in 0xe00
+	lda	#1	
+div	subb	#8	;subtract 8 from b	
+	cmpb	#8	;compare to 8
+	bgt	incr	;if b > 8 then increment a
+	pshu	a	;store the remainder in the stack
 	lsla
 	lsla
-	lsla
-	sta	$e02
-	ldb	$e00
-	subb	$e02
-	ldx	#table
+	lsla		;multiply by 8
+	sta	$e02	;store in 0xe02
+	ldb	$e00	;load the original coordinate
+	subb	$e02	;sub the original coordinate from the calculated
+	ldx	#table  ;load the table data and look up the bit position
 	abx
-	pshu	x
+	lda	,x
+	pshu	a	;store it in the user stack
 	rts
 incr	inca
 	jmp	div
