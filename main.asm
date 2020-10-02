@@ -6,11 +6,20 @@ start	org	$1200
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
+	lda	#3
+	lsla
+	lsla
+	lsla
+	lsla
+	lsla
+	sta	$e04	;ycoord
 btx	bsr	xcoord
 	pulu	a
-	pulu	b
-	nop
-	nop
+	pulu	b	;xcoord
+	addb	$e04
+	ldx	#vpstr
+	leax	b,x
+	sta	,x
 loop1	jmp	loop1
 	rts
 
