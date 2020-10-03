@@ -1,31 +1,23 @@
 vpstr	equ	$1400	;top left of screen
 vpend	equ	$2c00	;bottom right of screen
+crdmem	equ	$e00	;memory location for coord calculation
 start	org	$1200
-	ldu	#$e30
+	ldu	#$f00	;user stack location
 	bsr	initv
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
-	lda	#3
-	lsla
-	lsla
-	lsla
-	lsla
-	lsla
-	sta	$e04	;ycoord
-btx	bsr	xcoord
-	pulu	a
-	pulu	b	;xcoord
-	addb	$e04
-	ldx	#vpstr
-	leax	b,x
-	sta	,x
+	lda	#33	;x
+	ldb	#3	;y
+	pshu	a
+	pshu	b
+	bsr	drwpxl
 loop1	jmp	loop1
 	rts
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
-	sta	$ffc3
+	sta	$ffc3	;graphics pages start at 0x1400
 	sta	$ffc5
 	sta	$ffcd
 	sta	$ffc9
@@ -56,9 +48,24 @@ inner	std	,x++
 	cmpx	#vpend
 	blo	outer
 	rts
+
+drwpxl	pulu	a
+	lsla
+	lsla
+	lsla
+	lsla
+	lsla
+	sta	crdmem+4	;ycoord
+	bsr	xcoord
+	pulu	a
+	pulu	b	;xcoord
+	addb	crdmem+4
+	ldx	#vpstr
+	leax	b,x
+	sta	,x
 	
-xcoord	ldb	#33	;Original x coordinate
-	stb	$e00	;store it in 0xe00
+xcoord	pulu	b	;Original x coordinate
+	stb	crdmem	;store it in 0xe00
 	lda	#1	
 div	subb	#8	;subtract 8 from b	
 	cmpb	#8	;compare to 8
@@ -67,9 +74,9 @@ div	subb	#8	;subtract 8 from b
 	lsla
 	lsla
 	lsla		;multiply by 8
-	sta	$e02	;store in 0xe02
-	ldb	$e00	;load the original coordinate
-	subb	$e02	;sub the original coordinate from the calculated
+	sta	crdmem+2	;store in 0xe02
+	ldb	crdmem	;load the original coordinate
+	subb	crdmem+2	;sub the original coordinate from the calculated
 	ldx	#table  ;load the table data and look up the bit position
 	abx
 	lda	,x
