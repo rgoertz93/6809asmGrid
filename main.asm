@@ -12,6 +12,16 @@ start	org	$1200
 	pshu	a
 	pshu	b
 	bsr	drwpxl
+	lda	#35	;x
+	ldb	#25	;y
+	pshu	a
+	pshu	b
+	bsr	drwpxl
+	lda	#37	;x
+	ldb	#38	;y
+	pshu	a
+	pshu	b
+	bsr	drwpxl		
 loop1	jmp	loop1
 	rts
 
