@@ -59,20 +59,20 @@ inner	std	,x++
 	blo	outer
 	rts
 
-drwpxl	pulu	a
-	lsla
-	lsla
-	lsla
-	lsla
-	lsla
-	sta	crdmem+4	;ycoord
-	bsr	xcoord
-	pulu	a
-	pulu	b	;xcoord
-	addb	crdmem+4
+drwpxl	pulu	a	;pull the y coord from the stack
+	ldb	#32	
+	mul		;and multiply it by 32 to get the offset
+	std	crdmem+4	;store the y offset
+	bsr	xcoord	;calculate the x coordinate
+	pulu	a	;This is the bit position for the pixel
+	sta	crdmem+6
+	pulu	d	;xcoord
+	addd	crdmem+4
 	ldx	#vpstr
-	leax	b,x
+	leax	d,x
+	lda	crdmem+6
 	sta	,x
+	rts
 	
 xcoord	pulu	b	;Original x coordinate
 	stb	crdmem	;store it in 0xe00
