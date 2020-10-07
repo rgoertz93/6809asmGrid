@@ -103,13 +103,6 @@ div	subb	#8	;subtract 8 from b
 incr	inca
 	jmp	div
 
-table	fcb	0
-	fcb	128
-	fcb	64
-	fcb	32
-	fcb	16
-	fcb	8
-	fcb	2
-	fcb	1
+table	fcb	0,128,64,32,16,8,2,1
 
 	end	start
