@@ -79,6 +79,7 @@ drwpxl	pulu	a	;pull the y coord from the stack
 	ldx	#vpstr
 	leax	d,x
 	lda	crdmem+6
+	ora	,x
 	sta	,x
 	rts
 	
