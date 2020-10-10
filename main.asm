@@ -7,21 +7,12 @@ start	org	$1200
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
-	lda	#33	;x
-	ldb	#3	;y
+	ldx	#vpstr
+	lda	#33	;x coord
+	ldb	#3	;y coord
 	pshu	a
 	pshu	b
-	bsr	drwpxl
-	lda	#35	;x
-	ldb	#25	;y
-	pshu	a
-	pshu	b
-	bsr	drwpxl
-	lda	#37	;x
-	ldb	#38	;y
-	pshu	a
-	pshu	b
-	bsr	drwpxl		
+	bsr	offset	
 loop1	jmp	loop1
 	rts
 
@@ -58,6 +49,35 @@ inner	std	,x++
 	cmpx	#vpend
 	blo	outer
 	rts
+
+offset	pulu	a	;pull the y coord from the stack
+	tfr	a,b	;copy the contents of a into b
+	lslb		;begin multiply by 32
+	lslb
+	lslb
+	lslb
+	lslb
+	lsra
+	lsra
+	lsra		;end multiply by 32
+	leax	d,x	;add the y offset to the x register
+
+	pulu	a	;pull the x coord from the stack
+	ldb	#1	;this is the remainder
+div1	suba	#8	;integer division through subtraction
+	cmpa	#8
+	bgt	incr1
+	pshu	b	;push the remainder into the user stack
+	lslb		
+	lslb
+	lslb		;multiply by 8
+	lda	#0
+	leax	d,x	;add the x offset to the x register
+	lda	$ff
+	sta	,x
+	rts
+incr1	incb
+	jmp	div1
 
 drwpxl	pulu	a	;pull the y coord from the stack
 	tfr	a,b
