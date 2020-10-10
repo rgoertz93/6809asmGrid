@@ -9,7 +9,7 @@ start	org	$1200
 	bsr	horiz
 	ldx	#vpstr
 	lda	#33	;x coord
-	ldb	#3	;y coord
+	ldb	#1	;y coord
 	pshu	a
 	pshu	b
 	bsr	offset	
@@ -67,13 +67,9 @@ offset	pulu	a	;pull the y coord from the stack
 div1	suba	#8	;integer division through subtraction
 	cmpa	#8
 	bgt	incr1
-	pshu	b	;push the remainder into the user stack
-	lslb		
-	lslb
-	lslb		;multiply by 8
 	lda	#0
 	leax	d,x	;add the x offset to the x register
-	lda	$ff
+	lda	#$ff
 	sta	,x
 	rts
 incr1	incb
