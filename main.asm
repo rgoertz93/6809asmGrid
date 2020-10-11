@@ -13,6 +13,20 @@ start	org	$1200
 	pshu	a
 	pshu	b
 	bsr	offset	
+	lda	#$ff
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x	
+	leax	32,x
+	sta	,x				
 loop1	jmp	loop1
 	rts
 
@@ -69,8 +83,6 @@ div1	suba	#8	;integer division through subtraction
 	bgt	incr1
 	lda	#0
 	leax	d,x	;add the x offset to the x register
-	lda	#$ff
-	sta	,x
 	rts
 incr1	incb
 	jmp	div1
