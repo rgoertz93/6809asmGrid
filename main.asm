@@ -13,20 +13,7 @@ start	org	$1200
 	pshu	a
 	pshu	b
 	bsr	offset	
-	lda	#$ff
-	sta	,x
-	leax	32,x
-	sta	,x
-	leax	32,x
-	sta	,x
-	leax	32,x
-	sta	,x
-	leax	32,x
-	sta	,x
-	leax	32,x
-	sta	,x	
-	leax	32,x
-	sta	,x				
+	bsr	drwsqr				
 loop1	jmp	loop1
 	rts
 
@@ -86,6 +73,22 @@ div1	suba	#8	;integer division through subtraction
 	rts
 incr1	incb
 	jmp	div1
+
+drwsqr	lda	#$ff
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x
+	leax	32,x
+	sta	,x	
+	leax	32,x
+	sta	,x
+	rts
 
 drwpxl	pulu	a	;pull the y coord from the stack
 	tfr	a,b
