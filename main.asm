@@ -9,11 +9,12 @@ start	org	$1200
 	bsr	horiz
 	ldx	#vpstr
 	lda	#33	;x coord
-	ldb	#1	;y coord
+	ldb	#3	;y coord
+	pshu	a
 	pshu	a
 	pshu	b
 	bsr	offset	
-	bsr	drwsqr				
+	jsr	drwpxl			
 loop1	jmp	loop1
 	rts
 
@@ -90,50 +91,18 @@ drwsqr	lda	#$ff
 	sta	,x
 	rts
 
-drwpxl	pulu	a	;pull the y coord from the stack
-	tfr	a,b
+drwpxl	lslb
 	lslb
-	lslb
-	lslb
-	lslb
-	lslb
-	lsra
-	lsra
-	lsra
-	std	crdmem+4	;store the y offset
-	bsr	xcoord	;calculate the x coordinate
-	pulu	a	;This is the bit position for the pixel
-	sta	crdmem+6
-	lda	#0
-	pulu	b	;xcoord
-	addd	crdmem+4
-	ldx	#vpstr
-	leax	d,x
-	lda	crdmem+6
+	lslb	;muliply the remainder by 8
+	stb	crdmem
+	pulu	b
+	subb	crdmem
+	ldy	#table  ;load the table data and look up the bit position
+	leay	b,y
+	lda	,y
 	ora	,x
 	sta	,x
 	rts
-	
-xcoord	pulu	b	;Original x coordinate
-	stb	crdmem	;store it in 0xe00
-	lda	#1	
-div	subb	#8	;subtract 8 from b	
-	cmpb	#8	;compare to 8
-	bgt	incr	;if b > 8 then increment a
-	pshu	a	;store the remainder in the stack
-	lsla
-	lsla
-	lsla		;multiply by 8
-	sta	crdmem+2	;store in 0xe02
-	ldb	crdmem	;load the original coordinate
-	subb	crdmem+2	;sub the original coordinate from the calculated
-	ldx	#table  ;load the table data and look up the bit position
-	abx
-	lda	,x
-	pshu	a	;store it in the user stack
-	rts
-incr	inca
-	jmp	div
 
 table	fcb	0,128,64,32,16,8,2,1
 
