@@ -9,12 +9,16 @@ start	org	$1200
 	bsr	horiz
 	ldx	#vpstr
 	lda	#33	;x coord
-	ldb	#3	;y coord
+	ldb	#1	;y coord
+	pshu	a
+	pshu	b	
+	jsr	drwsqr
+	lda	#35
+	ldb	#27
 	pshu	a
 	pshu	a
 	pshu	b
-	bsr	offset	
-	jsr	drwpxl			
+	jsr	drwpxl	
 loop1	jmp	loop1
 	rts
 
@@ -75,7 +79,8 @@ div1	suba	#8	;integer division through subtraction
 incr1	incb
 	jmp	div1
 
-drwsqr	lda	#$ff
+drwsqr	bsr	offset
+	lda	#$ff
 	sta	,x
 	leax	32,x
 	sta	,x
@@ -91,7 +96,8 @@ drwsqr	lda	#$ff
 	sta	,x
 	rts
 
-drwpxl	lslb
+drwpxl	bsr	offset
+	lslb
 	lslb
 	lslb	;muliply the remainder by 8
 	stb	crdmem
