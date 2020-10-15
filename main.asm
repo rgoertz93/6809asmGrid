@@ -1,13 +1,13 @@
-vpstr	equ	$1400	;top left of screen
-vpend	equ	$2c00	;bottom right of screen
 crdmem	equ	$e00	;memory location for coord calculation
+pagmem	equ	$e10	;memory location for the page pointers
 start	org	$1200
 	ldu	#$f00	;user stack location
 	bsr	initv
+main	bsr	page1
 	bsr	vpclr
 	bsr	vert
 	bsr	horiz
-	ldx	#vpstr
+	ldx	pagmem
 	lda	#33	;x coord
 	ldb	#1	;y coord
 	pshu	a
@@ -19,40 +19,55 @@ start	org	$1200
 	pshu	a
 	pshu	b
 	jsr	drwpxl	
-loop1	jmp	loop1
+loop1	jmp	main
 	rts
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
 	sta	$ffc3	;graphics pages start at 0x1400
 	sta	$ffc5
-	sta	$ffcd
-	sta	$ffc9
 	rts
 
+page1	ldd	#$1400
+	std	pagmem
+	ldd	#$2c00
+	std	pagmem+2	
+	sta	$ffcd
+	sta	$ffc9	
+	rts
+
+page2	ldd	#$2c00
+	std	pagmem
+	ldd	#$4400
+	std	pagmem+2
+	sta	$ffcf
+	sta	$ffcb
+	sta	$ffc9
+	rts	
+
 vpclr	ldd	#0	;this clears the screen
-	ldx	#vpstr
+	ldx	pagmem
 vpclp	std	,x++	
-	cmpx	#vpend
+	cmpx	pagmem+2
 	blo	vpclp
 	rts
 
 vert	ldd	#$101	;draws the vertical lines
-	ldx	#vpstr
+	ldx	pagmem
 loop2	std	,x++
-	cmpx	#vpend
+	cmpx	pagmem+2
 	blo	loop2
 	rts
 
 horiz	ldd	#$ffff ;draws the horizontal lines
-	ldx	#vpstr
+	ldx	pagmem
 outer	ldy	#$0
 inner	std	,x++
 	leay	+1,y
 	cmpy	#$10
 	blo	inner
 	leax	+224,x
-	cmpx	#vpend
+	cmpx	pagmem+2
 	blo	outer
 	rts
 
