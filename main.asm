@@ -3,10 +3,10 @@ pagmem	equ	$e10	;memory location for the page pointers
 start	org	$1200
 	ldu	#$f00	;user stack location
 	bsr	initv
-main	bsr	page1
-	bsr	vpclr
-	bsr	vert
-	bsr	horiz
+main	jsr	inip1
+	jsr	vpclr
+	jsr	vert
+	jsr	horiz
 	ldx	pagmem
 	lda	#33	;x coord
 	ldb	#1	;y coord
@@ -19,6 +19,25 @@ main	bsr	page1
 	pshu	a
 	pshu	b
 	jsr	drwpxl	
+	jsr	page1
+
+	jsr	inip2
+	jsr	vpclr
+	jsr	vert
+	jsr	horiz
+	ldx	pagmem
+	lda	#33	;x coord
+	ldb	#20	;y coord
+	pshu	a
+	pshu	b	
+	jsr	drwsqr
+	lda	#35
+	ldb	#37
+	pshu	a
+	pshu	a
+	pshu	b
+	jsr	drwpxl	
+	jsr	page2
 loop1	jmp	main
 	rts
 
@@ -28,18 +47,27 @@ initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ffc5
 	rts
 
-page1	ldd	#$1400
+inip1	ldd	#$1400
 	std	pagmem
 	ldd	#$2c00
-	std	pagmem+2	
+	std	pagmem+2
+	rts
+
+page1	sta	$ffce	;clear page 2
+	sta	$ffca	;clear page 2
+	sta	$ffc8	;clear page 2
 	sta	$ffcd
 	sta	$ffc9	
 	rts
 
-page2	ldd	#$2c00
+inip2	ldd	#$2c00
 	std	pagmem
 	ldd	#$4400
 	std	pagmem+2
+	rts
+
+page2	sta	$ffcc	;clear page 2
+	sta	$ffc8	;clear page 2
 	sta	$ffcf
 	sta	$ffcb
 	sta	$ffc9
