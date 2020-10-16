@@ -1,10 +1,16 @@
 crdmem	equ	$e00	;memory location for coord calculation
 pagmem	equ	$e10	;memory location for the page pointers
+pagind	equ	$e20	;memory location for the page index
 start	org	$1200
 	ldu	#$f00	;user stack location
+	lda	#0
+	sta	pagind
 	bsr	initv
-main	jsr	inip1
-	jsr	vpclr
+main	lda	pagind
+	tsta
+	beq	inip1
+	bne	inip2
+main1	jsr	vpclr
 	jsr	vert
 	jsr	horiz
 	ldx	pagmem
@@ -18,26 +24,12 @@ main	jsr	inip1
 	pshu	a
 	pshu	a
 	pshu	b
-	jsr	drwpxl	
-	jsr	page1
-
-	jsr	inip2
-	jsr	vpclr
-	jsr	vert
-	jsr	horiz
-	ldx	pagmem
-	lda	#33	;x coord
-	ldb	#20	;y coord
-	pshu	a
-	pshu	b	
-	jsr	drwsqr
-	lda	#35
-	ldb	#37
-	pshu	a
-	pshu	a
-	pshu	b
-	jsr	drwpxl	
-	jsr	page2
+	jsr	drwpxl
+	lda	pagind
+	tsta
+	beq	page1
+	bne	page2	
+main2	nop
 loop1	jmp	main
 	rts
 
@@ -51,27 +43,31 @@ inip1	ldd	#$1400
 	std	pagmem
 	ldd	#$2c00
 	std	pagmem+2
-	rts
+	jmp	main1
 
 page1	sta	$ffce	;clear page 2
 	sta	$ffca	;clear page 2
 	sta	$ffc8	;clear page 2
 	sta	$ffcd
 	sta	$ffc9	
-	rts
+	lda	#1
+	sta	pagind
+	jmp	main2
 
 inip2	ldd	#$2c00
 	std	pagmem
 	ldd	#$4400
 	std	pagmem+2
-	rts
+	jmp	main1
 
 page2	sta	$ffcc	;clear page 2
 	sta	$ffc8	;clear page 2
 	sta	$ffcf
 	sta	$ffcb
 	sta	$ffc9
-	rts	
+	lda	#0
+	sta	pagind
+	jmp	main2	
 
 vpclr	ldd	#0	;this clears the screen
 	ldx	pagmem
