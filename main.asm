@@ -1,11 +1,17 @@
 crdmem	equ	$e00	;memory location for coord calculation
 pagmem	equ	$e10	;memory location for the page pointers
 pagind	equ	$e20	;memory location for the page index
+sqrind	equ	$e30	;memory location for the start index of the square
 start	org	$1200
 	ldu	#$f00	;user stack location
+	lda	$ff03
+	ora	#$01
+	sta	$ff03
 	lda	#0
 	sta	pagind
 	bsr	initv
+	ldd	#$20
+	std	sqrind
 main	lda	pagind
 	tsta
 	beq	inip1
@@ -14,17 +20,27 @@ main1	jsr	vpclr
 	jsr	vert
 	jsr	horiz
 	ldx	pagmem
-	lda	#33	;x coord
-	ldb	#1	;y coord
-	pshu	a
-	pshu	b	
+	ldd	sqrind
+	leax	d,x
 	jsr	drwsqr
-	lda	#35
-	ldb	#27
-	pshu	a
-	pshu	a
-	pshu	b
-	jsr	drwpxl
+	ldd	sqrind
+	addd	#1
+	std	sqrind
+*	lda	#33	;x coord
+*	ldb	#1	;y coord
+*	pshu	a
+*	pshu	b	
+*	jsr	drwsqr
+*	lda	#35
+*	ldb	#27
+*	pshu	a
+*	pshu	a
+*	pshu	b
+*	jsr	drwpxl
+
+vsync	lda	$ff02
+vwait	lda	$ff03
+	bpl	vwait
 	lda	pagind
 	tsta
 	beq	page1
@@ -118,8 +134,7 @@ div1	suba	#8	;integer division through subtraction
 incr1	incb
 	jmp	div1
 
-drwsqr	bsr	offset
-	lda	#$ff
+drwsqr	lda	#$ff
 	sta	,x
 	leax	32,x
 	sta	,x
