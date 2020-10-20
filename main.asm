@@ -23,9 +23,6 @@ main1	jsr	vpclr
 	ldd	sqrind
 	leax	d,x
 	jsr	drwsqr
-	ldd	sqrind
-	addd	#1
-	std	sqrind
 *	lda	#33	;x coord
 *	ldb	#1	;y coord
 *	pshu	a
@@ -41,13 +38,25 @@ main1	jsr	vpclr
 vsync	lda	$ff02
 vwait	lda	$ff03
 	bpl	vwait
-	lda	pagind
+
+	lda	#$fe
+	sta	$ff02
+	lda	$ff00
+	cmpa	#$f7
+	beq	keychk
+
+ok	lda	pagind
 	tsta
 	beq	page1
 	bne	page2	
 main2	nop
 loop1	jmp	main
 	rts
+
+keychk	ldd	sqrind
+	addd	#1
+	std	sqrind
+	jmp	ok
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
