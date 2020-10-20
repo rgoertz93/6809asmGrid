@@ -15,7 +15,7 @@ start	org	$1200
 main	lda	pagind
 	tsta
 	beq	inip1
-	bne	inip2
+	lbne	inip2
 main1	jsr	vpclr
 	jsr	vert
 	jsr	horiz
@@ -39,12 +39,17 @@ vsync	lda	$ff02
 vwait	lda	$ff03
 	bpl	vwait
 
-	lda	#$fe
+	lda	#$bf
 	sta	$ff02
 	lda	$ff00
 	cmpa	#$f7
-	beq	keychk
+	beq	right
 
+	lda	#$df
+	sta	$ff02
+	lda	$ff00	
+	cmpa	#$f7
+	beq	left
 ok	lda	pagind
 	tsta
 	beq	page1
@@ -53,10 +58,15 @@ main2	nop
 loop1	jmp	main
 	rts
 
-keychk	ldd	sqrind
+right	ldd	sqrind
 	addd	#1
 	std	sqrind
 	jmp	ok
+
+left	ldd	sqrind
+	subd	#1
+	std	sqrind
+	jmp	ok	
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
