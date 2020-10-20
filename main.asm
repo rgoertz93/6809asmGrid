@@ -9,12 +9,12 @@ start	org	$1200
 	sta	$ff03
 	lda	#0
 	sta	pagind
-	bsr	initv
+	lbsr	initv
 	ldd	#$20
 	std	sqrind
 main	lda	pagind
 	tsta
-	beq	inip1
+	lbeq	inip1
 	lbne	inip2
 main1	jsr	vpclr
 	jsr	vert
@@ -39,17 +39,29 @@ vsync	lda	$ff02
 vwait	lda	$ff03
 	bpl	vwait
 
-	lda	#$bf
+	lda	#%10111111
 	sta	$ff02
 	lda	$ff00
 	cmpa	#$f7
 	beq	right
 
-	lda	#$df
+	lda	#%11011111
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
 	beq	left
+
+	lda	#%11101111
+	sta	$ff02
+	lda	$ff00	
+	cmpa	#$f7
+	beq	down
+
+	lda	#%11110111
+	sta	$ff02
+	lda	$ff00	
+	cmpa	#$f7
+	beq	up		
 ok	lda	pagind
 	tsta
 	beq	page1
@@ -67,6 +79,16 @@ left	ldd	sqrind
 	subd	#1
 	std	sqrind
 	jmp	ok	
+
+down	ldd	sqrind
+	addd	#256
+	std	sqrind
+	jmp	ok
+
+up	ldd	sqrind
+	subd	#256
+	std	sqrind
+	jmp	ok
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
