@@ -3,6 +3,8 @@ pagmem	equ	$e10	;memory location for the page pointers
 pagind	equ	$e20	;memory location for the page index
 sqrind	equ	$e30	;memory location for the start index of the square
 start	org	$1200
+	lda	#1
+	sta	$ffd9
 	ldu	#$f00	;user stack location
 	lda	$ff03
 	ora	#$01
