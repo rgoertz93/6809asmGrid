@@ -1,14 +1,42 @@
+	org	$1200
+
 crdmem	equ	$e00	;memory location for coord calculation
 pagmem	equ	$e10	;memory location for the page pointers
 pagind	equ	$e20	;memory location for the page index
 sqrind	equ	$e30	;memory location for the start index of the square
-start	org	$1200
-	lda	#1
+	
+irq_start:
+	lda	$ff02
+	bne	irq_end
+
+	lda	pagind
+	tsta
+	lbeq	page1
+	lbne	page2
+irq_end:
+	rti	
+
+start	lda	#1
 	sta	$ffd9
 	ldu	#$f00	;user stack location
-	lda	$ff03
+
+	orcc	#$50	;disable firq and irqs
+	lda	$ff01
+	anda	#$fe	;disable hsync
+	sta	$ff01	;save settings
+	lda	$ff03	
 	ora	#$01
 	sta	$ff03
+	lda	$ff02
+
+	lda	#$7e
+	sta	$10c
+	ldx	#irq_start
+	stx	$10d
+
+	andcc	#$ef
+	lda	$ff02
+
 	lda	#0
 	sta	pagind
 	lbsr	initv
@@ -37,10 +65,6 @@ main1	jsr	vpclr
 *	pshu	b
 *	jsr	drwpxl
 
-vsync	lda	$ff02
-vwait	lda	$ff03
-	bpl	vwait
-
 	lda	#%10111111
 	sta	$ff02
 	lda	$ff00
@@ -63,34 +87,44 @@ vwait	lda	$ff03
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
-	beq	up		
-ok	lda	pagind
-	tsta
-	beq	page1
-	bne	page2	
+	beq	up			
 main2	nop
+	lda	pagind
+	tsta
+	beq	#set_page2
+	bne	#set_page1	
 loop1	jmp	main
+	rts
+
+set_page1:
+	lda	#0
+	sta	pagind	
+	rts
+
+set_page2:
+	lda	#1
+	sta	pagind	
 	rts
 
 right	ldd	sqrind
 	addd	#1
 	std	sqrind
-	jmp	ok
+	jmp	main2
 
 left	ldd	sqrind
 	subd	#1
 	std	sqrind
-	jmp	ok	
+	jmp	main2	
 
 down	ldd	sqrind
 	addd	#256
 	std	sqrind
-	jmp	ok
+	jmp	main2
 
 up	ldd	sqrind
 	subd	#256
 	std	sqrind
-	jmp	ok
+	jmp	main2
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
@@ -109,9 +143,7 @@ page1	sta	$ffce	;clear page 2
 	sta	$ffc8	;clear page 2
 	sta	$ffcd
 	sta	$ffc9	
-	lda	#1
-	sta	pagind
-	jmp	main2
+	rts
 
 inip2	ldd	#$2c00
 	std	pagmem
@@ -124,9 +156,7 @@ page2	sta	$ffcc	;clear page 2
 	sta	$ffcf
 	sta	$ffcb
 	sta	$ffc9
-	lda	#0
-	sta	pagind
-	jmp	main2	
+	rts	
 
 vpclr	ldd	#0	;this clears the screen
 	ldx	pagmem
