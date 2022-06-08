@@ -2,7 +2,7 @@
 
 crdmem	equ	$e00	;memory location for coord calculation
 pagmem	equ	$e10	;memory location for the page pointers
-pagind	equ	$e20	;memory location for the page index
+pagind	equ	$e20	;memory location for the page index/reference
 sqrind	equ	$e30	;memory location for the start index of the square
 	
 irq_start:
@@ -16,32 +16,33 @@ irq_start:
 irq_end:
 	rti	
 
-start	lda	#1
-	sta	$ffd9
+start:
+	lda	#1	;begin set mhz
+	sta	$ffd9	;end set mhz
 	ldu	#$f00	;user stack location
 
 	orcc	#$50	;disable firq and irqs
 	lda	$ff01
 	anda	#$fe	;disable hsync
 	sta	$ff01	;save settings
-	lda	$ff03	
-	ora	#$01
-	sta	$ff03
-	lda	$ff02
+	lda	$ff03	;vsync address
+	ora	#$01	;set enable bit
+	sta	$ff03	;enable vsync
+	lda	$ff02	;signal the system
 
-	lda	#$7e
-	sta	$10c
-	ldx	#irq_start
-	stx	$10d
+	lda	#$7e	*load jump instruction opcode
+	sta	$10c	*store it at IRQ jump address
+	ldx	#irq_start	*load x with pointer to irq routine
+	stx	$10d	*store the new IRQ address location
 
-	andcc	#$ef
-	lda	$ff02
+	andcc	#$ef	*enable irq
+	lda	$ff02	*signal the system
 
-	lda	#0
-	sta	pagind
-	lbsr	initv
+	lda	#0	
+	sta	pagind	*store 0 in the page index
+	lbsr	initv	*initialize the video
 	ldd	#$20
-	std	sqrind
+	std	sqrind	*store the initial location of the user square
 main	lda	pagind
 	tsta
 	lbeq	inip1
@@ -65,25 +66,25 @@ main1	jsr	vpclr
 *	pshu	b
 *	jsr	drwpxl
 
-	lda	#%10111111
+	lda	#%10111111	*Test for the right keypress
 	sta	$ff02
 	lda	$ff00
 	cmpa	#$f7
 	beq	right
 
-	lda	#%11011111
+	lda	#%11011111	*Test for the left keypress
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
 	beq	left
 
-	lda	#%11101111
+	lda	#%11101111	*Test for the down keypress
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
 	beq	down
 
-	lda	#%11110111
+	lda	#%11110111	*Test for the up keypress
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
@@ -91,20 +92,20 @@ main1	jsr	vpclr
 main2	nop
 	lda	pagind
 	tsta
-	beq	#set_page2
-	bne	#set_page1	
+	beq	#set_page1
+	bne	#set_page2	
 loop1	jmp	main
 	rts
 
 set_page1:
 	lda	#0
 	sta	pagind	
-	rts
+	jmp	loop1
 
 set_page2:
 	lda	#1
 	sta	pagind	
-	rts
+	jmp	loop1
 
 right	ldd	sqrind
 	addd	#1
