@@ -25,40 +25,35 @@ main1	jsr	vpclr
 	ldd	sqrind
 	leax	d,x
 	jsr	drwsqr
-*	lda	#33	;x coord
-*	ldb	#1	;y coord
-*	pshu	a
-*	pshu	b	
-*	jsr	drwsqr
-*	lda	#35
-*	ldb	#27
-*	pshu	a
-*	pshu	a
-*	pshu	b
-*	jsr	drwpxl
 
+	* Wait for the vsync irq to complete
 vsync	lda	$ff02
 vwait	lda	$ff03
 	bpl	vwait
+	* The vsync irq has completed
 
+	*Test for the right keypress	
 	lda	#%10111111
 	sta	$ff02
 	lda	$ff00
 	cmpa	#$f7
 	beq	right
 
+	*Test for the left keypress
 	lda	#%11011111
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
 	beq	left
 
+	*Test for the down keypress
 	lda	#%11101111
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
 	beq	down
 
+	*Test for the up keypress
 	lda	#%11110111
 	sta	$ff02
 	lda	$ff00	
@@ -72,21 +67,25 @@ main2	nop
 loop1	jmp	main
 	rts
 
+	*Process the right keypress
 right	ldd	sqrind
 	addd	#1
 	std	sqrind
 	jmp	ok
 
+	*Process the left keypress
 left	ldd	sqrind
 	subd	#1
 	std	sqrind
 	jmp	ok	
 
+	*Process the down keypress
 down	ldd	sqrind
 	addd	#256
 	std	sqrind
 	jmp	ok
 
+	*Process the up keypress
 up	ldd	sqrind
 	subd	#256
 	std	sqrind
