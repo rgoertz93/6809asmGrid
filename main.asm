@@ -97,6 +97,7 @@ initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ffc5
 	rts
 
+	*Setup the start and end memory addresses for the first page
 inip1	ldd	#$1400
 	std	pagmem
 	ldd	#$2c00
@@ -112,6 +113,7 @@ page1	sta	$ffce	;clear page 2
 	sta	pagind
 	jmp	main2
 
+	*Setup the start and end memory addresses for the second page
 inip2	ldd	#$2c00
 	std	pagmem
 	ldd	#$4400
