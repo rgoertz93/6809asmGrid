@@ -1,22 +1,26 @@
-	org	$1200
-
 crdmem	equ	$e00	;memory location for coord calculation
 pagmem	equ	$e10	;memory location for the page pointers
 pagind	equ	$e20	;memory location for the page index
 sqrind	equ	$e30	;memory location for the start index of the square
+start	org	$1200
+	lda	#1
+	sta	$ffd9
+	ldu	#$f00	;user stack location
+	lda	$ff03
+	ora	#$01
+	sta	$ff03
+	lda	#0
+	sta	pagind
+	lbsr	initv
+	ldd	#$20
+	std	sqrind
 
-irq_start:
-	lda	$ff02
-	bne	irq_end
-
-init_page:
-	lda	pagind
+* MAIN LOOP
+main	lda	pagind
 	tsta
-	lbeq	init_page1
-	lbne	init_page2
-
-draw_page:
-	jsr	vpclr
+	lbeq	inip1
+	lbne	inip2
+main1	jsr	vpclr
 	jsr	vert
 	jsr	horiz
 	ldx	pagmem
@@ -24,47 +28,12 @@ draw_page:
 	leax	d,x
 	jsr	drwsqr
 
-switch_page:
-	lda	pagind
-	tsta
-	lbeq	page1
-	lbne	page2	
+	* Wait for the vsync irq to complete
+vsync	lda	$ff02
+vwait	lda	$ff03
+	bpl	vwait
+	* The vsync irq has completed
 
-irq_end:
-	rti
-
-start:	
-	*Start the vsync setup
-	lda	#1	;begin set mhz
-	sta	$ffd9	;end set mhz
-	ldu	#$f00	;user stack location
-
-	orcc	#$50	;disable firq and irqs
-	lda	$ff01
-	anda	#$fe	;disable hsync
-	sta	$ff01	;save settings
-	lda	$ff03	;vsync address
-	ora	#$01	;set enable bit
-	sta	$ff03	;enable vsync
-	lda	$ff02	;signal the system
-
-	lda	#$7e	*load jump instruction opcode
-	sta	$10c	*store it at IRQ jump address
-	ldx	#irq_start	*load x with pointer to irq routine
-	stx	$10d	*store the new IRQ address location
-
-	andcc	#$ef	*enable irq
-	lda	$ff02	*signal the system
-	*End the vsync setup
-
-	ldu	#$f00	;user stack location
-	lda	#0
-	sta	pagind
-	lbsr	initv
-	ldd	#$20
-	std	sqrind
-
-main:	
 	*Test for the right keypress	
 	lda	#%10111111
 	sta	$ff02
@@ -91,33 +60,39 @@ main:
 	sta	$ff02
 	lda	$ff00	
 	cmpa	#$f7
-	beq	up
+	beq	up		
+ok	lda	pagind
+	tsta
+	beq	page1
+	bne	page2	
+main2	nop
 loop1	jmp	main
 	rts
+* END MAIN LOOP
 
 	*Process the right keypress
 right	ldd	sqrind
 	addd	#1
 	std	sqrind
-	jmp	main
+	jmp	ok
 
 	*Process the left keypress
 left	ldd	sqrind
 	subd	#1
 	std	sqrind
-	jmp	main	
+	jmp	ok	
 
 	*Process the down keypress
 down	ldd	sqrind
 	addd	#256
 	std	sqrind
-	jmp	main
+	jmp	ok
 
 	*Process the up keypress
 up	ldd	sqrind
 	subd	#256
 	std	sqrind
-	jmp	main
+	jmp	ok
 
 initv	lda	#$f0	;sets to color and graphics mode 6c
 	sta	$ff22	;at 256 x 192 resolution
@@ -126,12 +101,11 @@ initv	lda	#$f0	;sets to color and graphics mode 6c
 	rts
 
 	*Setup the start and end memory addresses for the first page
-init_page1:	
-	ldd	#$1400
+inip1	ldd	#$1400
 	std	pagmem
 	ldd	#$2c00
 	std	pagmem+2
-	jmp	draw_page
+	jmp	main1
 
 page1	sta	$ffce	;clear page 2
 	sta	$ffca	;clear page 2
@@ -140,15 +114,14 @@ page1	sta	$ffce	;clear page 2
 	sta	$ffc9	
 	lda	#1
 	sta	pagind
-	rts
+	jmp	main2
 
 	*Setup the start and end memory addresses for the second page
-init_page2:	
-	ldd	#$2c00
+inip2	ldd	#$2c00
 	std	pagmem
 	ldd	#$4400
 	std	pagmem+2
-	jmp	draw_page
+	jmp	main1
 
 page2	sta	$ffcc	;clear page 2
 	sta	$ffc8	;clear page 2
@@ -157,7 +130,7 @@ page2	sta	$ffcc	;clear page 2
 	sta	$ffc9
 	lda	#0
 	sta	pagind
-	rts
+	jmp	main2	
 
 vpclr	ldd	#0	;this clears the screen
 	ldx	pagmem
